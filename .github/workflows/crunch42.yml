@@ -21,21 +21,37 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
-      - name: 42crunch-static-api-testing
-        uses: 42Crunch/api-security-audit-action@v3
+
+
+      - name: Scan API for vulnerabilities
+        uses: 42Crunch/api-security-scan-action-freemium@v1
         with:
-          api-token: ${{ secrets.APITOKEN }}
-          platform-url: ${{ env.PLATFORM_URL}}
-          default-collection-name: GitHub-MyRepo-${{ github.ref_name }}
-          # Upload results to Github code scanning
-          upload-to-code-scanning: true
-          log-level: info
-          json-report: audit-action-report-${{ github.run_id }}
-          sarif-report: 42Crunch_AuditReport_${{ github.run_id }}.SARIF
-      - name: save-audit-report
+            # Upload results to Github Code Scanning
+            # Set to false if you don't have Github Advanced Security enabled.
+           
+            upload-to-code-scanning: true
+            scan-report: 42Crunch_RawReport_${{ github.run_id }}.json
+            export-as-pdf: 42Crunch_ScanReport_${{ github.run_id }}.pdf
+            log-level: info
+            sarif-report: 42Crunch_ScanReport_${{ github.run_id }}.SARIF
+      - name: save-sarif-report
         if: always()        
         uses: actions/upload-artifact@v3
         with:
-          name: auditaction-report-${{ github.run_id }}
-          path: audit-action-report-${{ github.run_id }}.json
-          if-no-files-found: error
+            name: 42Crunch_ScanReport_${{ github.run_id }}
+            path: 42Crunch_ScanReport_${{ github.run_id }}.SARIF
+            if-no-files-found: error
+      - name: save-scan-report
+        if: always()        
+        uses: actions/upload-artifact@v3
+        with:
+            name: 42Crunch_ScanReport_${{ github.run_id }}
+            path: 42Crunch_RawReport_${{ github.run_id }}.json
+            if-no-files-found: error  
+      - name: save-pdf-report
+        if: always()        
+        uses: actions/upload-artifact@v3
+        with:
+          name: 42Crunch_ScanReport_${{ github.run_id }}
+          path: 42Crunch_ScanReport_${{ github.run_id }}.pdf
+          if-no-files-found: error   
